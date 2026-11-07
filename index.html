@@ -1128,9 +1128,9 @@
     let data = readData();
 
     function randomNumber(){
-      // 12 random digits starting with 4, eg LV 445678901234
+      // 12 random digits starting with 4, eg 445678901234
       const digits = '4' + String(Math.floor(Math.random() * 1e11)).padStart(11, '0');
-      return 'LV ' + digits;
+      return digits;
     }
 
     function readData(){
@@ -1142,7 +1142,7 @@
           name: typeof parsed.name === 'string' ? parsed.name : '',
           birth: typeof parsed.birth === 'string' ? parsed.birth : '',
           valid: typeof parsed.valid === 'string' ? parsed.valid : '',
-          number: typeof parsed.number === 'string' && parsed.number ? parsed.number : randomNumber()
+          number: (typeof parsed.number === 'string' && parsed.number ? parsed.number : randomNumber()).replace(/^LV\s*/i, '')
         };
       } catch (e) {
         return { name:'', birth:'', valid:'', number:randomNumber() };
@@ -1211,7 +1211,7 @@
         name: nameInput.value.replace(/\s+/g, ' ').trim(),
         birth: birthInput.value.trim(),
         valid: validInput.value.trim(),
-        number: numberInput.value.trim() || randomNumber()
+        number: numberInput.value.trim().replace(/^LV\s*/i, '') || randomNumber()
       };
       try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
       window.dispatchEvent(new CustomEvent('streetcap-card-data', { detail: data }));
