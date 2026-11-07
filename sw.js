@@ -1,4 +1,4 @@
-const CACHE = 'goda-gimene-v1';
+const CACHE = 'goda-gimene-v2';
 
 const ASSETS = [
   './',

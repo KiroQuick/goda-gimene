@@ -17,14 +17,6 @@
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<script type="importmap">
-{
-  "imports": {
-    "three": "./vendor/three/build/three.module.js",
-    "three/addons/": "./vendor/three/examples/jsm/"
-  }
-}
-</script>
 <style>
   @font-face{
     font-family:"DINRoundPro";
@@ -1233,8 +1225,8 @@
   })();
 </script>
 <script type="module">
-  import * as THREE from 'three';
-  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import * as THREE from './vendor/three/build/three.module.js';
+  import { GLTFLoader } from './vendor/three/examples/jsm/loaders/GLTFLoader.js';
 
   const container = document.getElementById('card-3d-anchor');
 
