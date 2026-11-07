@@ -1029,11 +1029,11 @@
             </div>
             <div class="field">
               <label class="field__label" for="card-birth">Dzimšanas datums</label>
-              <input id="card-birth" name="birth" type="text" maxlength="10" inputmode="numeric" placeholder="DD.MM.GGGG"/>
+              <input id="card-birth" name="birth" type="text" maxlength="10" inputmode="text" placeholder="DD.MM.GGGG"/>
             </div>
             <div class="field">
               <label class="field__label" for="card-valid">Derīguma termiņš</label>
-              <input id="card-valid" name="valid" type="text" maxlength="10" inputmode="numeric" placeholder="DD.MM.GGGG"/>
+              <input id="card-valid" name="valid" type="text" maxlength="10" inputmode="text" placeholder="DD.MM.GGGG"/>
             </div>
             <div class="field">
               <label class="field__label" for="card-number">Apliecības numurs</label>
@@ -1128,8 +1128,9 @@
     let data = readData();
 
     function randomNumber(){
-      const block = function(){ return String(Math.floor(1000 + Math.random() * 9000)); };
-      return 'LV ' + block() + ' ' + block();
+      // 12 random digits starting with 4, eg LV 445678901234
+      const digits = '4' + String(Math.floor(Math.random() * 1e11)).padStart(11, '0');
+      return 'LV ' + digits;
     }
 
     function readData(){
