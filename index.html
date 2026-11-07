@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8d1233">
+<meta name="application-name" content="Goda ģimene">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Goda ģimene">
+<meta name="format-detection" content="telephone=no">
+<title>Latvijas Goda ģimene</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/build/three.module.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
+  }
+}
+</script>
+<style>
+  @font-face{
+    font-family:"DINRoundPro";
+    src:url("assets/DINRoundPro-Light.woff2") format("woff2");
+    font-weight:300;
+    font-style:normal;
+    font-display:swap;
+  }
+  @font-face{
+    font-family:"DINRoundPro";
+    src:url("assets/DINRoundPro-Regular.woff2") format("woff2");
+    font-weight:400;
+    font-style:normal;
+    font-display:swap;
+  }
+  @font-face{
+    font-family:"DINRoundPro";
+    src:url("assets/DINRoundPro-Medium.woff2") format("woff2");
+    font-weight:500;
+    font-style:normal;
+    font-display:swap;
+  }
+  @font-face{
+    font-family:"DINRoundPro";
+    src:url("assets/DINRoundPro-Bold.woff2") format("woff2");
+    font-weight:700;
+    font-style:normal;
+    font-display:swap;
+  }
+  @font-face{
+    font-family:"DINRoundPro";
+    src:url("assets/DINRoundPro-Black.woff2") format("woff2");
+    font-weight:900;
+    font-style:normal;
+    font-display:swap;
+  }
+
+  :root{
+    --wine:#8d1233;
+    --wine-deep:#760c28;
+    --wine-bright:#a0193e;
+    --cream:#f2e5d6;
+    --statusbar-h:44px;
+    --font-ui:"DINRoundPro","Segoe UI","Helvetica Neue",Arial,sans-serif;
+
+    /* Official brand ornament used across the app's red surfaces */
+    --brand-pattern:url("assets/ornament-overlay.svg");
+    --soft-pattern:url("assets/ornament-soft.svg");
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(900px 700px at 50% 18%, #391523 0%, #1c0b11 52%, #100609 100%);
+    font-family:var(--font-ui);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  button{font-family:inherit;touch-action:manipulation;}
+  button,a{-webkit-tap-highlight-color:transparent;}
+  input,textarea{-webkit-user-select:text;user-select:text;}
+
+  .phone{
+    position:relative;
+    width:min(100vw,390px);
+    height:min(100dvh,844px);
+    overflow:hidden;
+    isolation:isolate;
+    background:
+      radial-gradient(90% 55% at 50% 0%, rgba(255,255,255,.075), transparent 72%),
+      radial-gradient(130% 80% at 50% 108%, #9d183e 0%, transparent 60%),
+      linear-gradient(178deg, #861130 0%, #8c1435 48%, #780c29 100%);
+    box-shadow:0 34px 80px rgba(0,0,0,.6);
+  }
+
+  /* woven pattern over the whole red surface */
+  .phone::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:var(--brand-pattern);
+    background-size:45px auto;
+    pointer-events:none;
+  }
+
+  /* gentle vignette so the centre of the screen feels lit */
+  .phone::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(120% 74% at 50% 45%, transparent 52%, rgba(34,0,9,.30) 100%);
+    pointer-events:none;
+  }
+
+  .screen{
+    position:relative;
+    z-index:1;
+    height:100%;
+  }
+
+  /* ---------- status bar ---------- */
+  .statusbar{
+    height:var(--statusbar-h);
+    padding:0 12px 0 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#fff;
+  }
+  .clock{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  .status-icons{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#fff;
+  }
+  .status-icons svg{display:block;}
+
+  /* ---------- header ---------- */
+  .topbar{
+    height:70px;
+    padding:0 10px 0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{
+    display:inline-flex;
+    color:var(--cream);
+    text-decoration:none;
+    line-height:0;
+  }
+  .brand img{
+    width:58px;
+    height:auto;
+    display:block;
+    filter:drop-shadow(0 1px 1px rgba(45,0,10,.25));
+  }
+  .top-actions{
+    display:flex;
+    align-items:center;
+    gap:2px;
+  }
+  .icon-btn{
+    width:38px;
+    height:38px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    background:none;
+    border:0;
+    color:#fff;
+    cursor:pointer;
+    transition:opacity .16s ease, transform .16s ease;
+  }
+  .icon-btn svg{width:28px;height:28px;display:block;}
+  .icon-btn:hover{opacity:.78;}
+  .icon-btn:active{transform:scale(.92);}
+
+  /* ---------- primary menu ---------- */
+  .menu{
+    position:absolute;
+    top:20.3%;
+    left:50%;
+    transform:translateX(-50%);
+    width:66%;
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+  }
+  .menu-btn{
+    height:46px;
+    padding:0 14px;
+    border:1.4px solid rgba(255,255,255,.94);
+    border-radius:5px;
+    background:rgba(255,255,255,.03);
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:.2px;
+    text-shadow:0 1px 2px rgba(40,0,10,.22);
+    cursor:pointer;
+    transition:background .18s ease, transform .14s ease;
+  }
+  .menu-btn:hover{background:rgba(255,255,255,.10);}
+  .menu-btn:active{transform:scale(.985);}
+
+  .menu-btn:focus-visible,
+  .icon-btn:focus-visible{
+    outline:2px solid #ffdf9e;
+    outline-offset:2px;
+  }
+
+  /* ---------- white bottom panel ---------- */
+  .bottom-panel{
+    position:absolute;
+    top:67%;
+    left:0;
+    right:0;
+    bottom:0;
+    background:#fff;
+    overflow:hidden;
+    box-shadow:0 -8px 24px rgba(40,0,10,.07);
+    display:flex;
+    flex-direction:column;
+  }
+  .bottom-panel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:var(--soft-pattern);
+    background-size:45px auto;
+    pointer-events:none;
+  }
+
+  /* ---------- QR / flip panel ---------- */
+  .qr-view{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    z-index:10;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    width:min(92%,340px);
+    background:#fff;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 24px 48px rgba(0,0,0,.16);
+    padding:0;
+    text-align:center;
+  }
+  .bottom-panel.show .qr-view{ display:flex; }
+
+  .qr-icon{
+    margin:0 0 24px;
+    width:72px;
+  }
+  .qr-icon img{ width:72px; height:72px; display:block; margin:0 auto; }
+
+  .qr-title{
+    margin:0 0 20px;
+    font-size:22px;
+    font-weight:700;
+    color:#111;
+    line-height:1.35;
+  }
+  .qr-body{
+    margin:0 0 28px;
+    font-size:15.5px;
+    color:#484848;
+    line-height:1.6;
+  }
+  hr.qr-divider{
+    border:none;
+    border-top:1px solid #e5e5e5;
+    margin:0 0 28px;
+  }
+  .qr-btn{
+    max-width:300px;
+    height:48px;
+    background:#8d1233;
+    border:none;
+    border-radius:10px;
+    color:#fff;
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    margin:0 auto 22px;
+    display:block;
+  }
+  .qr-btn:hover{ background:#a0193e; }
+  .qr-btn:active{ transform:scale(.97); }
+  .qr-code{
+    margin:0;
+    font-size:13px;
+    color:#888;
+  }
+
+  /* invisible button over Saprotu */
+  .qr-close{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    top:58%; bottom:80%;
+    z-index:2;
+    width:300px;
+    height:48px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+  }
+  .qr-view__logos{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin:0 auto;
+  }
+  .qr-view__logos img{
+    width:64px;
+    height:auto;
+  }
+  .qr-view__title{
+    font-size:14px;
+    font-weight:700;
+    color:#a20c33;
+    margin:0;
+  }
+  .qr-view__code{
+    padding:10px;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(0,0,0,.10);
+    background:#fff;
+  }
+  .qr-view__svg{ width:170px; height:170px; display:block; }
+  .qr-view__side{
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color:#333;
+    line-height:1.32;
+  }
+  .qr-view__family strong{ color:#a20c33; }
+  .qr-view__family ul{ margin:4px auto 6px; padding:0; list-style:none; }
+  .qr-view__family li{ margin:2px 0; font-size:12px; }
+  .qr-view__note{ margin:0; font-size:10px; color:#666; }
+
+  /* 3D card — sits across the red/white divide, as in the design */
+  .card-container {
+    position: absolute;
+    top: 58.2%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 89%;
+    max-width: 350px;
+    aspect-ratio: 1.586;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .card-container canvas {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity .4s ease;
+    filter: saturate(1.45) contrast(1.06) drop-shadow(0 14px 18px rgba(45, 0, 10, .22));
+  }
+  .card-container.is-ready canvas {
+    opacity: 1;
+  }
+
+  /* fullscreen card view — slides in sideways over the whole screen */
+  .card-container.is-fullscreen {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    transform: none;
+    z-index: 30;
+    pointer-events: auto;
+    overflow: hidden;
+    isolation: isolate;
+    background-color: #7c0f2c;
+    background-image:
+      radial-gradient(120% 70% at 50% 18%, rgba(255,255,255,.10), transparent 62%),
+      var(--brand-pattern);
+    background-size: auto, 45px auto;
+    box-shadow: inset 0 0 110px rgba(28, 0, 8, .38);
+    animation: card-fs-in .44s cubic-bezier(.22,.9,.3,1) both;
+  }
+  .card-container.is-fullscreen.is-closing {
+    animation: card-fs-out .32s cubic-bezier(.45,.05,.7,.4) both;
+  }
+  .card-container.is-fullscreen canvas {
+    filter: saturate(1.45) contrast(1.06) drop-shadow(0 26px 44px rgba(18, 0, 6, .42));
+  }
+  @keyframes card-fs-in {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes card-fs-out {
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+  }
+
+  .card-fs-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 3;
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.34);
+    border-radius: 50%;
+    background: rgba(255,255,255,.13);
+    color: #fff;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    transition: background .16s ease, transform .16s ease;
+  }
+  .card-container.is-fullscreen .card-fs-close {
+    display: grid;
+  }
+  .card-fs-close svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+  .card-fs-close:hover { background: rgba(255,255,255,.24); }
+  .card-fs-close:active { transform: scale(.92); }
+  .card-fs-close:focus-visible {
+    outline: 2px solid #ffdf9e;
+    outline-offset: 2px;
+  }
+  .card-fs-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: none;
+    margin: 0;
+    width: max-content;
+    max-width: 90%;
+    color: rgba(255,255,255,.74);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .35px;
+    line-height: 1.3;
+    text-align: center;
+    pointer-events: none;
+  }
+  .card-container.is-fullscreen .card-fs-hint {
+    display: block;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-container.is-fullscreen,
+    .card-container.is-fullscreen.is-closing { animation-duration: .01s; }
+  }
+  .tabbar{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:12px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    align-items:center;
+    padding:0 10px;
+    gap:4px;
+    z-index:3;
+  }
+  .tab{
+    border:0;
+    background:none;
+    cursor:pointer;
+    color:#a20c33;
+    font:inherit;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:2px 4px 8px;
+  }
+  .tab__badge{
+    display:contents;
+  }
+  .tab__icon{
+    width:22px;
+    height:22px;
+    display:block;
+  }
+  .tab__label{
+    font-size:12.5px;
+    font-weight:600;
+    line-height:1.24;
+    text-align:center;
+  }
+  .tab__underline{
+    width:34px;
+    height:2px;
+    border-radius:1px;
+    background:transparent;
+    margin-top:-3px;
+    transition:background .18s ease;
+  }
+  .tab.is-active .tab__underline{
+    background:#a20c33;
+  }
+  .tab:hover .tab__label{ opacity:.78; }
+  .tab:active{ transform:scale(.97); }
+
+
+  /* ---------- profile / settings screen ---------- */
+  .profile-screen{
+    position:absolute;
+    top:var(--statusbar-h);
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:40;
+    display:flex;
+    flex-direction:column;
+    background:#fff;
+    transform:translateX(100%);
+    visibility:hidden;
+    transition:transform .3s cubic-bezier(.25,.8,.35,1), visibility 0s linear .3s;
+  }
+  .profile-screen.is-open{
+    transform:translateX(0);
+    visibility:visible;
+    transition:transform .3s cubic-bezier(.25,.8,.35,1);
+  }
+  .profile-head{
+    position:relative;
+    flex:0 0 54px;
+    display:flex;
+    align-items:center;
+    gap:2px;
+    padding:0 8px 0 6px;
+    color:#fff;
+    background:
+      radial-gradient(120% 160% at 50% 0%, rgba(255,255,255,.09), transparent 68%),
+      linear-gradient(180deg,#8d1233 0%,#7e0e2b 100%);
+    overflow:hidden;
+  }
+  .profile-head::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:var(--brand-pattern);
+    background-size:45px auto;
+    pointer-events:none;
+  }
+  .profile-head > *{ position:relative; z-index:1; }
+  .profile-head .icon-btn{
+    width:38px;
+    height:38px;
+    flex:0 0 auto;
+    color:#fff;
+  }
+  .profile-head .icon-btn:hover{ opacity:.78; }
+  .profile-back svg{ width:25px; height:25px; display:block; }
+  .profile-logo{
+    width:36px;
+    height:auto;
+    display:block;
+    margin-left:3px;
+    filter:drop-shadow(0 1px 1px rgba(45,0,10,.25));
+  }
+  .profile-head-actions{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+  }
+  .profile-head-actions .icon-btn svg{ width:26px; height:26px; }
+  .profile-body{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    background:#fff;
+  }
+  .profile-view{
+    padding:0 20px 30px;
+  }
+  .profile-view[hidden]{ display:none; }
+  .profile-title{
+    margin:15px 0 2px;
+    font-size:18.5px;
+    line-height:1.25;
+    font-weight:700;
+    color:#161616;
+    letter-spacing:.1px;
+  }
+  .profile-list{
+    display:flex;
+    flex-direction:column;
+  }
+  .profile-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    min-height:62px;
+    padding:0 2px;
+    border:0;
+    border-bottom:1px solid #ececec;
+    background:none;
+    color:#161616;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+  .profile-row:last-child{ border-bottom:0; }
+  .profile-row:active{ background:#faf6f7; }
+  .profile-row:focus-visible{ outline:2px solid #a20c33; outline-offset:-2px; }
+  .profile-row__icon{
+    flex:0 0 24px;
+    width:24px;
+    height:24px;
+    color:#a20c33;
+    display:grid;
+    place-items:center;
+  }
+  .profile-row__icon svg{ width:22px; height:22px; display:block; }
+  .profile-row__label{
+    flex:1 1 auto;
+    font-size:15.5px;
+    font-weight:700;
+    color:#181818;
+    letter-spacing:.15px;
+  }
+  .profile-row__chevron{
+    flex:0 0 18px;
+    width:18px;
+    height:18px;
+    color:#bcbcbc;
+  }
+  .profile-row__chevron svg{ width:18px; height:18px; display:block; }
+
+  /* settings form */
+  .settings-form{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding-top:10px;
+  }
+  .field{ display:block; }
+  .field__label{
+    display:block;
+    margin:0 0 7px 2px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+    color:#858585;
+  }
+  .field input{
+    width:100%;
+    height:48px;
+    padding:0 14px;
+    border:1px solid #ddd8d8;
+    border-radius:10px;
+    background:#fbfafa;
+    color:#141414;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:400;
+    outline:none;
+    transition:border-color .16s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .field input::placeholder{ color:#a9a2a2; }
+  .field input:focus{
+    border-color:#a20c33;
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(162,12,51,.12);
+  }
+  .number-row{ display:flex; gap:8px; }
+  .number-row input{
+    flex:1 1 auto;
+    min-width:0;
+    color:#5c5c5c;
+    letter-spacing:.6px;
+  }
+  .regen-btn{
+    flex:0 0 48px;
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    padding:0;
+    border:1px solid #ddd8d8;
+    border-radius:10px;
+    background:#fff;
+    color:#a20c33;
+    cursor:pointer;
+    transition:background .16s ease, transform .16s ease;
+  }
+  .regen-btn svg{ width:20px; height:20px; display:block; }
+  .regen-btn:hover{ background:#faf2f4; }
+  .regen-btn:active{ transform:scale(.94); }
+  .regen-btn:focus-visible{ outline:2px solid #a20c33; outline-offset:2px; }
+  .settings-note{
+    margin:0 2px;
+    font-size:12px;
+    line-height:1.5;
+    color:#8a8a8a;
+  }
+  .save-btn{
+    height:50px;
+    margin-top:4px;
+    border:0;
+    border-radius:10px;
+    background:#8d1233;
+    color:#fff;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.2px;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(141,18,51,.18);
+    transition:background .16s ease, transform .12s ease;
+  }
+  .save-btn:hover{ background:#9d1639; }
+  .save-btn:active{ transform:scale(.985); }
+  .save-btn:focus-visible{ outline:2px solid #a20c33; outline-offset:2px; }
+  .profile-screen .icon-btn:focus-visible{
+    outline:2px solid #ffdf9e;
+    outline-offset:2px;
+  }
+
+
+  /* ---------- home indicator ---------- */
+  .home-indicator{
+    position:absolute;
+    bottom:9px;
+    left:50%;
+    transform:translateX(-50%);
+    width:134px;
+    height:5px;
+    border-radius:99px;
+    background:#101010;
+    z-index:4;
+  }
+
+  /* on a desktop browser, present the screen as a handset */
+  @media (min-width:440px) and (min-height:780px){
+    .phone{
+      border-radius:38px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 0 0 10px #090506,
+        0 0 0 11px #3a232a,
+        0 44px 100px rgba(0,0,0,.65);
+    }
+  }
+
+  @media (max-height:720px){
+    .menu{top:20%;}
+    .menu-btn{height:38px;font-size:14px;}
+    .menu{gap:10px;}
+  }
+
+  /* ---------- installed app (iPhone home screen) ---------- */
+  @media all and (display-mode: standalone){
+    :root{ --statusbar-h:max(44px, env(safe-area-inset-top)); }
+
+    .phone{
+      width:min(100%,480px);
+      height:100dvh;
+      border-radius:0;
+      box-shadow:none;
+    }
+
+    /* the real iOS status bar takes over from the simulated one */
+    .statusbar .clock,
+    .statusbar .status-icons{ visibility:hidden; }
+
+    /* let the profile header run behind the real status bar */
+    .profile-screen{ top:0; }
+    .profile-head{
+      flex-basis:calc(54px + max(44px, env(safe-area-inset-top)));
+      padding-top:max(44px, env(safe-area-inset-top));
+    }
+
+    .home-indicator{ display:none; }
+
+    .tabbar{ bottom:calc(12px + env(safe-area-inset-bottom)); }
+    .profile-view{ padding-bottom:calc(30px + env(safe-area-inset-bottom)); }
+
+    .card-fs-close{ top:calc(16px + env(safe-area-inset-top)); }
+    .card-fs-hint{ bottom:calc(18px + env(safe-area-inset-bottom)); }
+  }
+</style>
+</head>
+<body>
+<main class="phone" aria-label="Goda ģimene mobilā lietotne">
+  <div class="screen">
+
+    <div class="statusbar" aria-hidden="true">
+      <span class="clock">17:28</span>
+      <span class="status-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+          <rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/>
+          <rect x="5" y="5.8" width="3" height="6.2" rx="1" fill="currentColor"/>
+          <rect x="10" y="3.4" width="3" height="8.6" rx="1" fill="currentColor"/>
+          <rect x="15" y="1" width="3" height="11" rx="1" fill="currentColor"/>
+        </svg>
+        <svg width="17" height="13" viewBox="0 0 17 13" fill="none">
+          <path d="M1.3 4.4C5.3.6 11.7.6 15.7 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M4 7.2c2.5-2.2 6.5-2.2 9 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M6.7 9.9c1-1 2.6-1 3.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <circle cx="8.5" cy="12" r="1" fill="currentColor"/>
+        </svg>
+        <svg width="26" height="13" viewBox="0 0 26 13" fill="none">
+          <rect x=".65" y=".65" width="22.2" height="11.7" rx="3.2" stroke="currentColor" stroke-opacity=".45" stroke-width="1.3"/>
+          <rect x="2.5" y="2.5" width="18.5" height="8" rx="1.7" fill="currentColor"/>
+          <path d="M24.2 4.6v3.8c1.1-.2 1.7-.9 1.7-1.9s-.6-1.7-1.7-1.9Z" fill="currentColor" fill-opacity=".55"/>
+        </svg>
+      </span>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Latvijas Goda ģimene">
+        <img src="assets/logo-white.svg" alt="Latvijas Goda ģimene">
+      </a>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="profile-toggle" type="button" aria-label="Mans profils">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M5.2 20c.6-4 3.4-6 6.8-6s6.2 2 6.8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="menu-toggle" type="button" aria-label="Izvēlne">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <nav class="menu" aria-label="Galvenā navigācija">
+      <button class="menu-btn" type="button">Atlaižu katalogs</button>
+      <button class="menu-btn" type="button">Jaunumi</button>
+      <button class="menu-btn" type="button">Atlaides tuvumā</button>
+    </nav>
+
+    <div id="card-3d-anchor" class="card-container">
+      <button class="card-fs-close" type="button" aria-label="Aizvērt pilnekrānu">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <p class="card-fs-hint">Pagrieziet tālruni, lai lasītu</p>
+    </div>
+
+    <section class="bottom-panel" aria-label="Atrākās darbības">
+      <article class="qr-view" aria-label="QR kods">
+        <div class="qr-icon" aria-hidden="true">
+          <img src="qr code crossed over.png" alt="QR crossed out"/>
+        </div>
+        <h2 class="qr-title">Šī funkcija tagad<br>nedarbojas</h2>
+        <p class="qr-body">QR koda attēlošana tehniskās iemeslu dēl nav pieejama.<br>Lūdzu, mēģiniet vēlāk.</p>
+        <hr class="qr-divider"/>
+        <button class="qr-btn" type="button">Saprotu</button>
+        <p class="qr-code">Kļūda: ERR-QR-01</p>
+        <button class="qr-close" type="button" aria-label="Aizvērt"></button>
+      </article>
+      <nav class="tabbar" aria-label="Apliecības darbības">
+        <button class="tab" type="button" data-tab="flip">
+          <svg class="tab__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M17.6 17.4c-4.2.5-6.4-2.2-6.4-5.5 0-2.5 1.5-4.2 4.2-5.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            <path d="M20.8 2.7 14.5 4.6l4.2 4.4Z" fill="currentColor"/>
+            <path d="M8.0 4.1Q8.0 6.6 10.5 6.6Q8.0 6.6 8.0 9.1Q8.0 6.6 5.5 6.6Q8.0 6.6 8.0 4.1Z" fill="currentColor"/>
+            <path d="M5.3 9.5Q5.3 11.2 7.0 11.2Q5.3 11.2 5.3 12.9Q5.3 11.2 3.6 11.2Q5.3 11.2 5.3 9.5Z" fill="currentColor"/>
+            <path d="M7.5 13.7Q7.5 15.8 9.6 15.8Q7.5 15.8 7.5 17.9Q7.5 15.8 5.4 15.8Q7.5 15.8 7.5 13.7Z" fill="currentColor"/>
+          </svg>
+          <span class="tab__label">Otra<br>puse</span>
+          <span class="tab__underline"></span>
+        </button>
+        <button class="tab" type="button" data-tab="fullscreen">
+          <svg class="tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="10" cy="10" r="6"/>
+            <line x1="14.2" y1="14.2" x2="19" y2="19"/>
+            <line x1="10" y1="7" x2="10" y2="13"/>
+            <line x1="7" y1="10" x2="13" y2="10"/>
+          </svg>
+          <span class="tab__label">Pa visu<br>ekrānu</span>
+          <span class="tab__underline"></span>
+        </button>
+        <button class="tab" type="button" data-tab="qr">
+          <svg class="tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1"/>
+            <rect x="13" y="3.5" width="7.5" height="7.5" rx="1"/>
+            <rect x="3.5" y="13" width="7.5" height="7.5" rx="1"/>
+            <rect x="14.2" y="14.2" width="1.6" height="1.6" rx=".4" fill="currentColor"/>
+            <rect x="17.4" y="14.2" width="1.6" height="1.6" rx=".4" fill="currentColor"/>
+            <rect x="14.2" y="17.4" width="1.6" height="1.6" rx=".4" fill="currentColor"/>
+            <rect x="17.4" y="17.4" width="1.6" height="1.6" rx=".4" fill="currentColor"/>
+          </svg>
+          <span class="tab__label">QR<br>kods</span>
+          <span class="tab__underline"></span>
+        </button>
+      </nav>
+      <span class="home-indicator" aria-hidden="true"></span>
+    </section>
+
+    <section class="profile-screen" id="profile-screen" aria-label="Mans profils" aria-hidden="true" inert>
+      <header class="profile-head">
+        <button class="icon-btn profile-back" id="profile-back" type="button" aria-label="Atpakaļ">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <img class="profile-logo" src="assets/logo-white.svg" alt="Latvijas Goda ģimene">
+        <div class="profile-head-actions">
+          <button class="icon-btn" type="button" aria-label="Mans profils">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M5.2 20c.6-4 3.4-6 6.8-6s6.2 2 6.8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="profile-menu" type="button" aria-label="Aizvērt izvēlni">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="profile-body" id="profile-body">
+        <div class="profile-view" id="profile-main">
+          <h2 class="profile-title">Mans profils</h2>
+          <nav class="profile-list" aria-label="Profila sadaļas">
+            <button class="profile-row" type="button">
+              <span class="profile-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2.6" y="5.2" width="18.8" height="13.6" rx="2.8"/>
+                  <path d="M2.6 9.8h18.8"/>
+                  <path d="M6.2 15h4.2"/>
+                </svg>
+              </span>
+              <span class="profile-row__label">Apliecības</span>
+              <span class="profile-row__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 5.5 15.5 12 9 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <button class="profile-row" type="button">
+              <span class="profile-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.5 4.2 7 3.4l2 4.2-1.8 1.5a12.3 12.3 0 0 0 5.7 5.7l1.5-1.8 4.2 2-.8 2.5c-.3 1-1.2 1.6-2.2 1.5A16.2 16.2 0 0 1 3 5.9c-.1-1 .5-1.9 1.5-2.2Z"/>
+                </svg>
+              </span>
+              <span class="profile-row__label">Kontaktinformācija</span>
+              <span class="profile-row__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 5.5 15.5 12 9 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <button class="profile-row" type="button">
+              <span class="profile-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6.2 2.8h7l4.1 4.1v14.3H6.2z"/>
+                  <path d="M13.2 2.8v4.1h4.1"/>
+                  <path d="M9 12h5.5M9 15.5h5.5"/>
+                </svg>
+              </span>
+              <span class="profile-row__label">Iesniegums</span>
+              <span class="profile-row__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 5.5 15.5 12 9 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <button class="profile-row" type="button">
+              <span class="profile-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4.6" y="10.2" width="14.8" height="10.4" rx="2.2"/>
+                  <path d="M8.1 10.2V7.6a3.9 3.9 0 0 1 7.8 0v2.6"/>
+                  <circle cx="12" cy="15.4" r="1.2" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+              <span class="profile-row__label">Aizsardzības veids</span>
+              <span class="profile-row__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 5.5 15.5 12 9 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <button class="profile-row" type="button" data-profile="settings">
+              <span class="profile-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </span>
+              <span class="profile-row__label">Iestatījumi</span>
+              <span class="profile-row__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 5.5 15.5 12 9 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="profile-view" id="profile-settings" hidden>
+          <h2 class="profile-title">Iestatījumi</h2>
+          <form class="settings-form" id="card-settings-form" novalidate>
+            <div class="field">
+              <label class="field__label" for="card-name">Apliecības īpašnieks</label>
+              <input id="card-name" name="name" type="text" maxlength="40" autocomplete="name" placeholder="Vārds Uzvārds"/>
+            </div>
+            <div class="field">
+              <label class="field__label" for="card-birth">Dzimšanas datums</label>
+              <input id="card-birth" name="birth" type="text" maxlength="10" inputmode="numeric" placeholder="DD.MM.GGGG"/>
+            </div>
+            <div class="field">
+              <label class="field__label" for="card-valid">Derīguma termiņš</label>
+              <input id="card-valid" name="valid" type="text" maxlength="10" inputmode="numeric" placeholder="DD.MM.GGGG"/>
+            </div>
+            <div class="field">
+              <label class="field__label" for="card-number">Apliecības numurs</label>
+              <div class="number-row">
+                <input id="card-number" name="number" type="text" readonly aria-readonly="true"/>
+                <button class="regen-btn" id="regenerate-number" type="button" aria-label="Ģenerēt jaunu apliecības numuru" title="Ģenerēt jaunu numuru">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 11a8 8 0 1 0-2.2 5.5"/>
+                    <path d="M20 4v7h-7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="settings-note">Numurs tiek ģenerēts nejauši. Dati tiek saglabāti tikai šajā ierīcē.</p>
+            <button class="save-btn" type="submit">Saglabāt</button>
+          </form>
+        </div>
+      </div>
+      <span class="home-indicator" aria-hidden="true"></span>
+    </section>
+
+  </div>
+</main>
+<script>
+  (function(){
+    const panel = document.querySelector('.bottom-panel');
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const closeBtn = document.querySelector('.qr-close');
+    if (!panel || !tabs.length) return;
+    function hideQR(){
+      panel.classList.remove('show');
+      tabs.forEach(function(t){ t.classList.remove('is-active'); });
+    }
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const kind = btn.dataset.tab;
+        const alreadyActive = btn.classList.contains('is-active');
+
+        if (kind === 'fullscreen') {
+          tabs.forEach(function(t){ t.classList.remove('is-active'); });
+          panel.classList.remove('show');
+          document.dispatchEvent(new CustomEvent('card-fullscreen-open'));
+          return;
+        }
+
+        tabs.forEach(function(t){ t.classList.remove('is-active'); });
+        if (!alreadyActive){
+          btn.classList.add('is-active');
+        }
+
+        if (kind === 'flip') {
+          panel.classList.remove('show');
+          window.postMessage('flip-card', '*');
+          return;
+        }
+
+        panel.classList.toggle('show', !alreadyActive);
+      });
+    });
+    if (closeBtn){
+      closeBtn.addEventListener('click', hideQR);
+    }
+    const saprotuBtn = document.querySelector('.qr-btn');
+    if (saprotuBtn){
+      saprotuBtn.addEventListener('click', hideQR);
+    }
+  })();
+</script>
+<script>
+  (function(){
+    const KEY = 'streetcap.cardData.v1';
+    const screen = document.getElementById('profile-screen');
+    const body = document.getElementById('profile-body');
+    const mainView = document.getElementById('profile-main');
+    const settingsView = document.getElementById('profile-settings');
+    const form = document.getElementById('card-settings-form');
+    if (!screen || !form) return;
+
+    const openers = [document.getElementById('menu-toggle'), document.getElementById('profile-toggle')].filter(Boolean);
+    const backBtn = document.getElementById('profile-back');
+    const closeBtn = document.getElementById('profile-menu');
+    const settingsRow = document.querySelector('[data-profile="settings"]');
+    const nameInput = document.getElementById('card-name');
+    const birthInput = document.getElementById('card-birth');
+    const validInput = document.getElementById('card-valid');
+    const numberInput = document.getElementById('card-number');
+    const regenBtn = document.getElementById('regenerate-number');
+    const appLayers = Array.from(screen.parentElement.children).filter(function(el){ return el !== screen; });
+
+    let inSettings = false;
+    let lastFocus = null;
+    let data = readData();
+
+    function randomNumber(){
+      const block = function(){ return String(Math.floor(1000 + Math.random() * 9000)); };
+      return 'LV ' + block() + ' ' + block();
+    }
+
+    function readData(){
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return { name:'', birth:'', valid:'', number:randomNumber() };
+        const parsed = JSON.parse(raw);
+        return {
+          name: typeof parsed.name === 'string' ? parsed.name : '',
+          birth: typeof parsed.birth === 'string' ? parsed.birth : '',
+          valid: typeof parsed.valid === 'string' ? parsed.valid : '',
+          number: typeof parsed.number === 'string' && parsed.number ? parsed.number : randomNumber()
+        };
+      } catch (e) {
+        return { name:'', birth:'', valid:'', number:randomNumber() };
+      }
+    }
+
+    function fillForm(){
+      if (!data.number) data.number = randomNumber();
+      nameInput.value = data.name;
+      birthInput.value = data.birth;
+      validInput.value = data.valid;
+      numberInput.value = data.number;
+    }
+
+    function showMain(){
+      inSettings = false;
+      mainView.hidden = false;
+      settingsView.hidden = true;
+      body.scrollTop = 0;
+    }
+
+    function showSettings(){
+      inSettings = true;
+      fillForm();
+      mainView.hidden = true;
+      settingsView.hidden = false;
+      body.scrollTop = 0;
+    }
+
+    function openProfile(){
+      lastFocus = document.activeElement;
+      appLayers.forEach(function(el){ el.inert = true; });
+      screen.classList.add('is-open');
+      screen.removeAttribute('inert');
+      screen.setAttribute('aria-hidden', 'false');
+      showMain();
+      if (backBtn) backBtn.focus({ preventScroll: true });
+    }
+
+    function closeProfile(){
+      appLayers.forEach(function(el){ el.inert = false; });
+      screen.classList.remove('is-open');
+      if (lastFocus && typeof lastFocus.focus === 'function') {
+        lastFocus.focus({ preventScroll: true });
+      }
+      screen.setAttribute('aria-hidden', 'true');
+      screen.setAttribute('inert', '');
+    }
+
+    openers.forEach(function(btn){ btn.addEventListener('click', openProfile); });
+
+    if (backBtn) backBtn.addEventListener('click', function(){
+      if (inSettings) showMain(); else closeProfile();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    if (settingsRow) settingsRow.addEventListener('click', showSettings);
+
+    if (regenBtn) regenBtn.addEventListener('click', function(){
+      numberInput.value = randomNumber();
+      numberInput.focus({ preventScroll: true });
+    });
+
+    form.addEventListener('submit', function(event){
+      event.preventDefault();
+      data = {
+        name: nameInput.value.replace(/\s+/g, ' ').trim(),
+        birth: birthInput.value.trim(),
+        valid: validInput.value.trim(),
+        number: numberInput.value.trim() || randomNumber()
+      };
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+      window.dispatchEvent(new CustomEvent('streetcap-card-data', { detail: data }));
+      closeProfile();
+    });
+
+    window.addEventListener('keydown', function(event){
+      if (event.key === 'Escape' && screen.classList.contains('is-open')) {
+        if (inSettings) showMain(); else closeProfile();
+      }
+    });
+  })();
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const container = document.getElementById('card-3d-anchor');
+
+  if (container) {
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.domElement.setAttribute('aria-hidden', 'true');
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(24, 1, 0.005, 2);
+
+    // Lights are placed in front of the upright card so the printed face stays vivid.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x3c4d34, 1.3));
+    const key = new THREE.DirectionalLight(0xffffff, 2.2);
+    key.position.set(-0.12, 0.24, 0.32);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xfff2e2, 0.6);
+    fill.position.set(0.24, 0.03, 0.2);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.7);
+    rim.position.set(0.05, 0.22, -0.3);
+    scene.add(rim);
+
+    // The card faces the viewer straight on. It no longer orbits freely,
+    // so its edges can never be sliced off by the canvas bounds.
+    // rig flips the card front/back; upright stands the modelled flat card up.
+    const presentation = new THREE.Group();
+    const rig = new THREE.Group();
+    const upright = new THREE.Group();
+    upright.rotation.x = Math.PI / 2;
+    rig.add(upright);
+    presentation.add(rig);
+    scene.add(presentation);
+
+    // Real-world card dimensions from the glTF (1 unit = 1 m).
+    const CARD_W = 0.0856;
+    const CARD_H = 0.05398;
+
+    let isFullscreen = false;
+    let spin = null;
+
+    function fitDistance() {
+      const vFov = THREE.MathUtils.degToRad(camera.fov);
+      const halfH = Math.tan(vFov / 2);
+      const halfW = halfH * camera.aspect;
+      // In fullscreen the card is turned 90°, so its axes swap.
+      const wide = isFullscreen ? CARD_H : CARD_W;
+      const tall = isFullscreen ? CARD_W : CARD_H;
+      const padding = isFullscreen ? 1.12 : 1.09;
+      const distance = Math.max((tall / 2) / halfH, (wide / 2) / halfW);
+      return distance * padding;
+    }
+
+    function applyCameraDistance() {
+      camera.position.set(0, 0, fitDistance());
+      camera.lookAt(0, 0, 0);
+    }
+
+    function resize() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      applyCameraDistance();
+    }
+
+    resize();
+
+    const CARD_DATA_KEY = 'streetcap.cardData.v1';
+    let frontTexture = null;
+    let frontOriginal = null;
+    let cardData = readCardData();
+
+    function readCardData() {
+      try {
+        const raw = localStorage.getItem(CARD_DATA_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function drawFittedText(ctx, text, x, y, size, maxWidth) {
+      if (!text) return;
+      let fontSize = size;
+      ctx.font = '700 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+      while (fontSize > size * 0.62 && ctx.measureText(text).width > maxWidth) {
+        fontSize -= 1;
+        ctx.font = '700 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+      }
+      ctx.fillText(String(text), x, y);
+    }
+
+    function paintCardValues() {
+      if (!frontTexture || !frontOriginal) return;
+      const w = frontOriginal.width;
+      const h = frontOriginal.height;
+      if (!w || !h) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(frontOriginal, 0, 0, w, h);
+      if (cardData) {
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#fdf6e7';
+        ctx.shadowColor = 'rgba(24, 42, 8, .62)';
+        ctx.shadowBlur = Math.max(2, w * 0.006);
+        ctx.shadowOffsetY = Math.max(1, w * 0.0025);
+        const size = w * 0.0395;
+        drawFittedText(ctx, cardData.number, w * 0.068, h * 0.700, size, w * 0.285);
+        drawFittedText(ctx, cardData.birth, w * 0.409, h * 0.700, size, w * 0.255);
+        drawFittedText(ctx, cardData.valid, w * 0.690, h * 0.700, size, w * 0.255);
+        drawFittedText(ctx, cardData.name, w * 0.068, h * 0.876, size, w * 0.87);
+      }
+      frontTexture.image = canvas;
+      frontTexture.needsUpdate = true;
+    }
+
+    window.addEventListener('streetcap-card-data', (event) => {
+      if (event.detail) {
+        cardData = event.detail;
+        paintCardValues();
+      }
+    });
+
+    const loader = new GLTFLoader();
+    loader.load(
+      'streetcap_card.glb',
+      (gltf) => {
+        const card = gltf.scene;
+        upright.add(card);
+
+        card.traverse((object) => {
+          if (!object.isMesh) return;
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => {
+            if (material && material.name === 'CardFront' && material.map && !frontTexture) {
+              frontTexture = material.map;
+              frontOriginal = material.map.image;
+            }
+          });
+        });
+
+        if (frontTexture) {
+          paintCardValues();
+          if (document.fonts && document.fonts.load) {
+            Promise.all([
+              document.fonts.load('700 24px DINRoundPro'),
+              document.fonts.load('400 16px DINRoundPro')
+            ]).then(paintCardValues).catch(() => {});
+          }
+        }
+
+        container.classList.add('is-ready');
+        resize();
+      },
+      undefined,
+      (error) => {
+        console.error('Card model failed to load:', error);
+        container.classList.add('is-error');
+      }
+    );
+
+    let flipped = false;
+    let flip = null;
+
+    const easeInOutCubic = (t) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    window.addEventListener('message', (event) => {
+      if (event.data !== 'flip-card') return;
+      flipped = !flipped;
+      flip = {
+        from: rig.rotation.y,
+        to: flipped ? Math.PI : 0,
+        start: performance.now(),
+        duration: 340
+      };
+    });
+
+    const closeBtn = container.querySelector('.card-fs-close');
+    const fullscreenTab = document.querySelector('.tab[data-tab="fullscreen"]');
+    let closeTimer = 0;
+
+    function openFullscreen() {
+      if (isFullscreen) return;
+      clearTimeout(closeTimer);
+      isFullscreen = true;
+      container.classList.remove('is-closing');
+      container.classList.add('is-fullscreen');
+      spin = {
+        from: presentation.rotation.z % (Math.PI * 2),
+        to: Math.PI / 2,
+        start: performance.now(),
+        duration: 440
+      };
+      resize();
+      if (closeBtn) closeBtn.focus({ preventScroll: true });
+    }
+
+    function closeFullscreen() {
+      if (!isFullscreen) return;
+      isFullscreen = false;
+      container.classList.add('is-closing');
+      spin = {
+        from: presentation.rotation.z,
+        to: 0,
+        start: performance.now(),
+        duration: 300
+      };
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        container.classList.remove('is-fullscreen', 'is-closing');
+        resize();
+        if (fullscreenTab) fullscreenTab.focus({ preventScroll: true });
+      }, 320);
+    }
+
+    document.addEventListener('card-fullscreen-open', openFullscreen);
+    if (closeBtn) closeBtn.addEventListener('click', closeFullscreen);
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isFullscreen) closeFullscreen();
+    });
+
+    renderer.setAnimationLoop(() => {
+      const now = performance.now();
+      if (flip) {
+        const t = Math.min(1, (now - flip.start) / flip.duration);
+        rig.rotation.y = flip.from + (flip.to - flip.from) * easeInOutCubic(t);
+        if (t >= 1) {
+          rig.rotation.y = flip.to;
+          flip = null;
+        }
+      }
+      if (spin) {
+        const t = Math.min(1, (now - spin.start) / spin.duration);
+        presentation.rotation.z = spin.from + (spin.to - spin.from) * easeInOutCubic(t);
+        if (t >= 1) {
+          presentation.rotation.z = spin.to;
+          spin = null;
+        }
+      }
+      renderer.render(scene, camera);
+    });
+
+    new ResizeObserver(resize).observe(container);
+  }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+</script>
+</body>
+</html>
