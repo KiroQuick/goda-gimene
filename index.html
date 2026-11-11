@@ -1254,15 +1254,14 @@
       }
     }
 
-    function drawFittedText(ctx, text, x, y, size, maxWidth) {
-      if (!text) return;
+    function drawFittedText(ctx, text, x, y, size, maxWidth, weight) {
       let fontSize = size;
-      ctx.font = '500 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
-      while (fontSize > size * 0.62 && ctx.measureText(text).width > maxWidth) {
+      ctx.font = weight + ' ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+      while (fontSize > size * 0.7 && ctx.measureText(text).width > maxWidth) {
         fontSize -= 1;
-        ctx.font = '500 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+        ctx.font = weight + ' ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
       }
-      ctx.fillText(String(text), x, y);
+      ctx.fillText(text, x, y, maxWidth);
     }
 
     function paintCardValues() {
@@ -1277,15 +1276,24 @@
       if (!ctx) return;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(frontOriginal, 0, 0, w, h);
-      if (cardData) {
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = '#fdf6e7';
-        const size = w * 0.0395;
-        drawFittedText(ctx, cardData.number, w * 0.068, h * 0.700, size, w * 0.285);
-        drawFittedText(ctx, cardData.birth, w * 0.409, h * 0.700, size, w * 0.255);
-        drawFittedText(ctx, cardData.valid, w * 0.690, h * 0.700, size, w * 0.255);
-        drawFittedText(ctx, cardData.name, w * 0.068, h * 0.876, size, w * 0.87);
+      ctx.fillStyle = '#243c20';
+      ctx.beginPath();
+      ctx.roundRect(w * 0.039, h * 0.540, w * 0.922, h * 0.419, w * 0.023);
+      ctx.fill();
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      const fields = [
+        ['Apliecības Nr.', cardData?.number, 0.069, 0.314, 0.628, 0.729, 0.051],
+        ['Dzimšanas datums', cardData?.birth, 0.400, 0.268, 0.628, 0.729, 0.051],
+        ['Derīga līdz', cardData?.valid, 0.686, 0.245, 0.628, 0.729, 0.051],
+        ['Apliecības īpašnieks', cardData?.name, 0.069, 0.86, 0.823, 0.920, 0.060]
+      ];
+      for (const [label, value, x, width, labelY, valueY, size] of fields) {
+        ctx.fillStyle = '#e6f0d9';
+        drawFittedText(ctx, label, w * x, h * labelY, w * 0.034, w * width, 500);
+        ctx.fillStyle = '#fffdf5';
+        drawFittedText(ctx, String(value || '—'), w * x, h * valueY, w * size, w * width, 700);
       }
       frontTexture.image = canvas;
       frontTexture.needsUpdate = true;
@@ -1319,7 +1327,10 @@
         if (frontTexture) {
           paintCardValues();
           if (document.fonts && document.fonts.load) {
-            document.fonts.load('500 24px DINRoundPro').then(paintCardValues).catch(() => {});
+            Promise.all([
+              document.fonts.load('500 24px DINRoundPro'),
+              document.fonts.load('700 24px DINRoundPro')
+            ]).then(paintCardValues).catch(() => {});
           }
         }
 
