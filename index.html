@@ -55,7 +55,7 @@
   }
 
   :root{
-    --wine:#8d1233;
+    --wine:#93102d;
     --wine-deep:#760c28;
     --wine-bright:#a0193e;
     --cream:#f2e5d6;
@@ -94,8 +94,8 @@
     isolation:isolate;
     background:
       radial-gradient(90% 55% at 50% 0%, rgba(255,255,255,.075), transparent 72%),
-      radial-gradient(130% 80% at 50% 108%, #9d183e 0%, transparent 60%),
-      linear-gradient(178deg, #861130 0%, #8c1435 48%, #780c29 100%);
+      radial-gradient(130% 80% at 50% 108%, #a41535 0%, transparent 60%),
+      linear-gradient(178deg, #92102d 0%, var(--wine) 48%, #830d28 100%);
     box-shadow:0 34px 80px rgba(0,0,0,.6);
   }
 
@@ -243,122 +243,88 @@
     pointer-events:none;
   }
 
-  /* ---------- QR / flip panel ---------- */
+  /* ---------- QR error ---------- */
+  .screen.is-qr-open{
+    --qr-top:max(35.25%, calc(var(--statusbar-h) + 248px));
+  }
+  .screen.is-qr-open .menu{ top:calc(var(--statusbar-h) + 70px); }
+  .screen.is-qr-open .card-container{ visibility:hidden; }
+
   .qr-view{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    z-index:10;
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    width:min(92%,340px);
-    background:#fff;
-    border-radius:24px;
-    overflow:hidden;
-    box-shadow:0 24px 48px rgba(0,0,0,.16);
-    padding:0;
-    text-align:center;
-  }
-  .bottom-panel.show .qr-view{ display:flex; }
-
-  .qr-icon{
-    margin:0 0 24px;
-    width:72px;
-  }
-  .qr-icon img{ width:72px; height:72px; display:block; margin:0 auto; }
-
-  .qr-title{
-    margin:0 0 20px;
-    font-size:22px;
-    font-weight:700;
-    color:#111;
-    line-height:1.35;
-  }
-  .qr-body{
-    margin:0 0 28px;
-    font-size:15.5px;
-    color:#484848;
-    line-height:1.6;
-  }
-  hr.qr-divider{
-    border:none;
-    border-top:1px solid #e5e5e5;
-    margin:0 0 28px;
-  }
-  .qr-btn{
-    max-width:300px;
-    height:48px;
-    background:#8d1233;
-    border:none;
-    border-radius:10px;
-    color:#fff;
-    font-size:18px;
-    font-weight:600;
-    cursor:pointer;
-    margin:0 auto 22px;
-    display:block;
-  }
-  .qr-btn:hover{ background:#a0193e; }
-  .qr-btn:active{ transform:scale(.97); }
-  .qr-code{
-    margin:0;
-    font-size:14px;
-    font-weight:600;
-    letter-spacing:.35px;
-    line-height:1.45;
-    color:var(--wine-deep);
-  }
-
-  /* invisible button over Saprotu */
-  .qr-close{
     position:absolute;
+    top:var(--qr-top);
     left:50%;
     transform:translateX(-50%);
-    top:58%; bottom:80%;
-    z-index:2;
-    width:300px;
-    height:48px;
-    border:none;
-    background:transparent;
+    z-index:10;
+    width:clamp(246px,73%,340px);
+    max-width:calc(100% - 24px);
+    max-height:calc(100% - var(--qr-top) - 86px - env(safe-area-inset-bottom, 0px));
+    padding:24px 19px 18px;
+    overflow:auto;
+    overscroll-behavior:contain;
+    background:#f2f2f2;
+    border-radius:12px;
+    box-shadow:0 10px 26px rgba(24,16,18,.16);
+    text-align:center;
+  }
+  .qr-icon{
+    display:block;
+    width:46px;
+    height:auto;
+    margin:0 auto 12px;
+  }
+  .qr-title{
+    max-width:18ch;
+    margin:0 auto 12px;
+    font-size:18px;
+    font-weight:700;
+    color:#2c3440;
+    line-height:1.2;
+    text-wrap:balance;
+  }
+  .qr-body{
+    max-width:27ch;
+    margin:0 auto 14px;
+    font-size:14px;
+    color:#454d57;
+    line-height:1.4;
+  }
+  .qr-divider{
+    border:0;
+    border-top:1px solid #dcdde0;
+    margin:0 0 12px;
+  }
+  .qr-btn{
+    display:block;
+    width:100%;
+    min-height:44px;
+    padding:8px 12px;
+    background:#b90d33;
+    border:0;
+    border-radius:8px;
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
     cursor:pointer;
   }
-  .qr-view__logos{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:18px;
-    margin:0 auto;
+  .qr-btn:hover{ background:var(--wine); }
+  .qr-btn:active{ background:var(--wine-deep); }
+  .qr-btn:focus-visible{ outline:2px solid var(--wine-deep); outline-offset:2px; }
+  .qr-code{
+    margin:12px 0 0;
+    font-size:11px;
+    line-height:1.4;
+    color:#5c636c;
   }
-  .qr-view__logos img{
-    width:64px;
-    height:auto;
+  @media (max-height:720px){
+    .screen.is-qr-open{ --qr-top:calc(var(--statusbar-h) + 218px); }
+    .qr-view{ padding-top:16px; padding-bottom:14px; }
+    .qr-icon{ width:38px; margin-bottom:8px; }
+    .qr-title{ margin-bottom:8px; }
+    .qr-body{ margin-bottom:10px; }
+    .qr-divider{ margin-bottom:8px; }
+    .qr-code{ margin-top:8px; }
   }
-  .qr-view__title{
-    font-size:14px;
-    font-weight:700;
-    color:#a20c33;
-    margin:0;
-  }
-  .qr-view__code{
-    padding:10px;
-    border-radius:10px;
-    box-shadow:0 6px 18px rgba(0,0,0,.10);
-    background:#fff;
-  }
-  .qr-view__svg{ width:170px; height:170px; display:block; }
-  .qr-view__side{
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    color:#333;
-    line-height:1.32;
-  }
-  .qr-view__family strong{ color:#a20c33; }
-  .qr-view__family ul{ margin:4px auto 6px; padding:0; list-style:none; }
-  .qr-view__family li{ margin:2px 0; font-size:12px; }
-  .qr-view__note{ margin:0; font-size:10px; color:#666; }
 
   /* 3D card — sits across the red/white divide, as in the design */
   .card-container {
@@ -401,7 +367,7 @@
     pointer-events: auto;
     overflow: hidden;
     isolation: isolate;
-    background-color: #7c0f2c;
+    background-color: var(--wine);
     background-image:
       radial-gradient(120% 70% at 50% 18%, rgba(255,255,255,.10), transparent 62%),
       var(--brand-pattern);
@@ -880,18 +846,16 @@
       <p class="card-fs-hint">Pagrieziet tālruni, lai lasītu</p>
     </div>
 
+    <article class="qr-view" id="qr-error" aria-labelledby="qr-error-title" hidden>
+      <img class="qr-icon" src="qr code crossed over.png" alt="" width="73" height="77"/>
+      <h2 class="qr-title" id="qr-error-title" tabindex="-1">Šī funkcija tagad nedarbojas</h2>
+      <p class="qr-body">QR koda attēlošana tehnisku iemeslu dēļ nav pieejama. Lūdzu, mēģiniet vēlreiz vēlāk.</p>
+      <hr class="qr-divider"/>
+      <button class="qr-btn" type="button">Saprotu</button>
+      <p class="qr-code">Kļūda: ERR-QR-01</p>
+    </article>
+
     <section class="bottom-panel" aria-label="Atrākās darbības">
-      <article class="qr-view" aria-label="QR kods">
-        <div class="qr-icon" aria-hidden="true">
-          <img src="qr code crossed over.png" alt="QR crossed out"/>
-        </div>
-        <h2 class="qr-title">Šī funkcija tagad<br>nedarbojas</h2>
-        <p class="qr-body">QR koda attēlošana tehniskās iemeslu dēl nav pieejama.<br>Lūdzu, mēģiniet vēlāk.</p>
-        <hr class="qr-divider"/>
-        <button class="qr-btn" type="button">Saprotu</button>
-        <p class="qr-code">Kļūda: ERR-QR-01</p>
-        <button class="qr-close" type="button" aria-label="Aizvērt"></button>
-      </article>
       <nav class="tabbar" aria-label="Apliecības darbības">
         <button class="tab" type="button" data-tab="flip">
           <svg class="tab__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -914,7 +878,7 @@
           <span class="tab__label">Pa visu<br>ekrānu</span>
           <span class="tab__underline"></span>
         </button>
-        <button class="tab" type="button" data-tab="qr">
+        <button class="tab" type="button" data-tab="qr" aria-controls="qr-error" aria-expanded="false">
           <svg class="tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1"/>
             <rect x="13" y="3.5" width="7.5" height="7.5" rx="1"/>
@@ -1062,47 +1026,53 @@
 </main>
 <script>
   (function(){
-    const panel = document.querySelector('.bottom-panel');
+    const qrError = document.getElementById('qr-error');
+    const screen = qrError.closest('.screen');
     const tabs = Array.from(document.querySelectorAll('.tab'));
-    const closeBtn = document.querySelector('.qr-close');
-    if (!panel || !tabs.length) return;
-    function hideQR(){
-      panel.classList.remove('show');
-      tabs.forEach(function(t){ t.classList.remove('is-active'); });
+    const qrTab = document.querySelector('[data-tab="qr"]');
+    const title = document.getElementById('qr-error-title');
+    const acknowledge = qrError.querySelector('.qr-btn');
+
+    function showQR(show){
+      qrError.hidden = !show;
+      screen.classList.toggle('is-qr-open', show);
+      qrTab.setAttribute('aria-expanded', String(show));
     }
+
+    function dismissQR(){
+      showQR(false);
+      qrTab.classList.remove('is-active');
+      qrTab.focus();
+    }
+
     tabs.forEach(function(btn){
       btn.addEventListener('click', function(){
         const kind = btn.dataset.tab;
         const alreadyActive = btn.classList.contains('is-active');
+        tabs.forEach(function(tab){ tab.classList.remove('is-active'); });
 
         if (kind === 'fullscreen') {
-          tabs.forEach(function(t){ t.classList.remove('is-active'); });
-          panel.classList.remove('show');
+          showQR(false);
           document.dispatchEvent(new CustomEvent('card-fullscreen-open'));
           return;
         }
 
-        tabs.forEach(function(t){ t.classList.remove('is-active'); });
-        if (!alreadyActive){
-          btn.classList.add('is-active');
-        }
+        if (!alreadyActive) btn.classList.add('is-active');
 
         if (kind === 'flip') {
-          panel.classList.remove('show');
+          showQR(false);
           window.postMessage('flip-card', '*');
           return;
         }
 
-        panel.classList.toggle('show', !alreadyActive);
+        showQR(!alreadyActive);
+        if (!alreadyActive) title.focus({ preventScroll: true });
       });
     });
-    if (closeBtn){
-      closeBtn.addEventListener('click', hideQR);
-    }
-    const saprotuBtn = document.querySelector('.qr-btn');
-    if (saprotuBtn){
-      saprotuBtn.addEventListener('click', hideQR);
-    }
+    acknowledge.addEventListener('click', dismissQR);
+    qrError.addEventListener('keydown', function(event){
+      if (event.key === 'Escape') dismissQR();
+    });
   })();
 </script>
 <script>
@@ -1322,10 +1292,10 @@
     function drawFittedText(ctx, text, x, y, size, maxWidth) {
       if (!text) return;
       let fontSize = size;
-      ctx.font = '700 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+      ctx.font = '500 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
       while (fontSize > size * 0.62 && ctx.measureText(text).width > maxWidth) {
         fontSize -= 1;
-        ctx.font = '700 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
+        ctx.font = '500 ' + fontSize + 'px "DINRoundPro", Arial, sans-serif';
       }
       ctx.fillText(String(text), x, y);
     }
@@ -1345,9 +1315,6 @@
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#fdf6e7';
-        ctx.shadowColor = 'rgba(24, 42, 8, .62)';
-        ctx.shadowBlur = Math.max(2, w * 0.006);
-        ctx.shadowOffsetY = Math.max(1, w * 0.0025);
         const size = w * 0.0395;
         drawFittedText(ctx, cardData.number, w * 0.068, h * 0.700, size, w * 0.285);
         drawFittedText(ctx, cardData.birth, w * 0.409, h * 0.700, size, w * 0.255);
@@ -1386,10 +1353,7 @@
         if (frontTexture) {
           paintCardValues();
           if (document.fonts && document.fonts.load) {
-            Promise.all([
-              document.fonts.load('700 24px DINRoundPro'),
-              document.fonts.load('400 16px DINRoundPro')
-            ]).then(paintCardValues).catch(() => {});
+            document.fonts.load('500 24px DINRoundPro').then(paintCardValues).catch(() => {});
           }
         }
 
