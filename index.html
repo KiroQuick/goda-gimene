@@ -1276,24 +1276,18 @@
       if (!ctx) return;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(frontOriginal, 0, 0, w, h);
-      ctx.fillStyle = '#243c20';
-      ctx.beginPath();
-      ctx.roundRect(w * 0.039, h * 0.540, w * 0.922, h * 0.419, w * 0.023);
-      ctx.fill();
-
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#fffdf5';
       const fields = [
-        ['Apliecības Nr.', cardData?.number, 0.069, 0.314, 0.628, 0.729, 0.051],
-        ['Dzimšanas datums', cardData?.birth, 0.400, 0.268, 0.628, 0.729, 0.051],
-        ['Derīga līdz', cardData?.valid, 0.686, 0.245, 0.628, 0.729, 0.051],
-        ['Apliecības īpašnieks', cardData?.name, 0.069, 0.86, 0.823, 0.920, 0.060]
+        ['Apliecības numurs:', cardData?.number, 0.04, 0.36, 0.660, 0.738],
+        ['Dzimšanas datums:', cardData?.birth, 0.42, 0.29, 0.660, 0.738],
+        ['Derīguma termiņš:', cardData?.valid, 0.733, 0.231, 0.660, 0.738],
+        ['Apliecības īpašnieks:', cardData?.name, 0.04, 0.92, 0.845, 0.921]
       ];
-      for (const [label, value, x, width, labelY, valueY, size] of fields) {
-        ctx.fillStyle = '#e6f0d9';
-        drawFittedText(ctx, label, w * x, h * labelY, w * 0.034, w * width, 500);
-        ctx.fillStyle = '#fffdf5';
-        drawFittedText(ctx, String(value || '—'), w * x, h * valueY, w * size, w * width, 700);
+      for (const [label, value, x, width, labelY, valueY] of fields) {
+        drawFittedText(ctx, label, w * x, h * labelY, w * 0.025, w * width, 500);
+        if (value) drawFittedText(ctx, String(value), w * x, h * valueY, w * 0.045, w * width, 700);
       }
       frontTexture.image = canvas;
       frontTexture.needsUpdate = true;
