@@ -1,4 +1,4 @@
-const CACHE = 'goda-gimene-v9';
+const CACHE = 'goda-gimene-v10';
 
 const ASSETS = [
   './',
@@ -22,7 +22,7 @@ const ASSETS = [
   './assets/ornament-light-red.svg',
   './assets/ornament-overlay.svg',
   './assets/ornament-red.svg',
-  './assets/ornament-soft.svg',
+  './assets/ornament-soft.svg?v=2',
   './qr code crossed over.png',
   './streetcap_card.glb?v=35442c51',
   './vendor/three/build/three.module.js',
