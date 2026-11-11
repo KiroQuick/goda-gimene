@@ -1267,8 +1267,8 @@
 
     function paintCardValues() {
       if (!frontTexture || !frontOriginal) return;
-      const w = frontOriginal.width * 2;
-      const h = frontOriginal.height * 2;
+      const w = frontOriginal.width;
+      const h = frontOriginal.height;
       if (!w || !h) return;
       const canvas = document.createElement('canvas');
       canvas.width = w;
