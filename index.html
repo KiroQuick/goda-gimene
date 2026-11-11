@@ -244,21 +244,11 @@
   }
 
   /* ---------- QR error ---------- */
-  .screen.is-qr-open{
-    --qr-top:max(35.25%, calc(var(--statusbar-h) + 248px));
-  }
-  .screen.is-qr-open .menu{ top:calc(var(--statusbar-h) + 70px); }
-  .screen.is-qr-open .card-container{ visibility:hidden; }
-
   .qr-view{
-    position:absolute;
-    top:var(--qr-top);
-    left:50%;
-    transform:translateX(-50%);
-    z-index:10;
-    width:clamp(246px,73%,340px);
+    width:min(73vw,286px);
     max-width:calc(100% - 24px);
-    max-height:calc(100% - var(--qr-top) - 86px - env(safe-area-inset-bottom, 0px));
+    max-height:calc(100dvh - 32px);
+    border:0;
     padding:24px 19px 18px;
     overflow:auto;
     overscroll-behavior:contain;
@@ -267,6 +257,7 @@
     box-shadow:0 10px 26px rgba(24,16,18,.16);
     text-align:center;
   }
+  .qr-view::backdrop{ background:rgba(24,8,14,.18); }
   .qr-icon{
     display:block;
     width:46px;
@@ -317,7 +308,6 @@
     color:#5c636c;
   }
   @media (max-height:720px){
-    .screen.is-qr-open{ --qr-top:calc(var(--statusbar-h) + 218px); }
     .qr-view{ padding-top:16px; padding-bottom:14px; }
     .qr-icon{ width:38px; margin-bottom:8px; }
     .qr-title{ margin-bottom:8px; }
@@ -345,14 +335,13 @@
     width: 100%;
     height: 100%;
     opacity: 0;
-    transition: opacity .4s ease;
     filter: saturate(1.45) contrast(1.06) drop-shadow(0 14px 18px rgba(45, 0, 10, .22));
   }
   .card-container.is-ready canvas {
     opacity: 1;
   }
 
-  /* fullscreen card view — slides in sideways over the whole screen */
+  /* fullscreen card view */
   .card-container.is-fullscreen {
     position: absolute;
     inset: 0;
@@ -373,23 +362,10 @@
       var(--brand-pattern);
     background-size: auto, 45px auto;
     box-shadow: inset 0 0 110px rgba(28, 0, 8, .38);
-    animation: card-fs-in .44s cubic-bezier(.22,.9,.3,1) both;
-  }
-  .card-container.is-fullscreen.is-closing {
-    animation: card-fs-out .32s cubic-bezier(.45,.05,.7,.4) both;
   }
   .card-container.is-fullscreen canvas {
     filter: saturate(1.45) contrast(1.06) drop-shadow(0 26px 44px rgba(18, 0, 6, .42));
   }
-  @keyframes card-fs-in {
-    from { transform: translateX(100%); }
-    to   { transform: translateX(0); }
-  }
-  @keyframes card-fs-out {
-    from { transform: translateX(0); }
-    to   { transform: translateX(100%); }
-  }
-
   .card-fs-close {
     position: absolute;
     top: 16px;
@@ -443,10 +419,6 @@
   }
   .card-container.is-fullscreen .card-fs-hint {
     display: block;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .card-container.is-fullscreen,
-    .card-container.is-fullscreen.is-closing { animation-duration: .01s; }
   }
   .tabbar{
     position:absolute;
@@ -846,14 +818,14 @@
       <p class="card-fs-hint">Pagrieziet tālruni, lai lasītu</p>
     </div>
 
-    <article class="qr-view" id="qr-error" aria-labelledby="qr-error-title" hidden>
+    <dialog class="qr-view" id="qr-error" aria-labelledby="qr-error-title" aria-describedby="qr-error-message">
       <img class="qr-icon" src="qr code crossed over.png" alt="" width="73" height="77"/>
       <h2 class="qr-title" id="qr-error-title" tabindex="-1">Šī funkcija tagad nedarbojas</h2>
-      <p class="qr-body">QR koda attēlošana tehnisku iemeslu dēļ nav pieejama. Lūdzu, mēģiniet vēlreiz vēlāk.</p>
+      <p class="qr-body" id="qr-error-message">QR koda attēlošana tehnisku iemeslu dēļ nav pieejama. Lūdzu, mēģiniet vēlreiz vēlāk.</p>
       <hr class="qr-divider"/>
       <button class="qr-btn" type="button">Saprotu</button>
       <p class="qr-code">Kļūda: ERR-QR-01</p>
-    </article>
+    </dialog>
 
     <section class="bottom-panel" aria-label="Atrākās darbības">
       <nav class="tabbar" aria-label="Apliecības darbības">
@@ -1027,23 +999,10 @@
 <script>
   (function(){
     const qrError = document.getElementById('qr-error');
-    const screen = qrError.closest('.screen');
     const tabs = Array.from(document.querySelectorAll('.tab'));
     const qrTab = document.querySelector('[data-tab="qr"]');
     const title = document.getElementById('qr-error-title');
     const acknowledge = qrError.querySelector('.qr-btn');
-
-    function showQR(show){
-      qrError.hidden = !show;
-      screen.classList.toggle('is-qr-open', show);
-      qrTab.setAttribute('aria-expanded', String(show));
-    }
-
-    function dismissQR(){
-      showQR(false);
-      qrTab.classList.remove('is-active');
-      qrTab.focus();
-    }
 
     tabs.forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -1052,7 +1011,6 @@
         tabs.forEach(function(tab){ tab.classList.remove('is-active'); });
 
         if (kind === 'fullscreen') {
-          showQR(false);
           document.dispatchEvent(new CustomEvent('card-fullscreen-open'));
           return;
         }
@@ -1060,18 +1018,20 @@
         if (!alreadyActive) btn.classList.add('is-active');
 
         if (kind === 'flip') {
-          showQR(false);
           window.postMessage('flip-card', '*');
           return;
         }
 
-        showQR(!alreadyActive);
-        if (!alreadyActive) title.focus({ preventScroll: true });
+        qrTab.setAttribute('aria-expanded', 'true');
+        qrError.showModal();
+        title.focus({ preventScroll: true });
       });
     });
-    acknowledge.addEventListener('click', dismissQR);
-    qrError.addEventListener('keydown', function(event){
-      if (event.key === 'Escape') dismissQR();
+    acknowledge.addEventListener('click', function(){ qrError.close(); });
+    qrError.addEventListener('close', function(){
+      qrTab.setAttribute('aria-expanded', 'false');
+      qrTab.classList.remove('is-active');
+      qrTab.focus({ preventScroll: true });
     });
   })();
 </script>
@@ -1206,7 +1166,6 @@
 
   if (container) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
     renderer.toneMappingExposure = 1.0;
@@ -1244,7 +1203,7 @@
     const CARD_H = 0.05398;
 
     let isFullscreen = false;
-    let spin = null;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     function fitDistance() {
       const vFov = THREE.MathUtils.degToRad(camera.fov);
@@ -1273,7 +1232,13 @@
       applyCameraDistance();
     }
 
-    resize();
+    function updatePixelRatio() {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
+      resize();
+    }
+
+    updatePixelRatio();
+    window.addEventListener('resize', updatePixelRatio);
 
     const CARD_DATA_KEY = 'streetcap.cardData.v1';
     let frontTexture = null;
@@ -1302,14 +1267,15 @@
 
     function paintCardValues() {
       if (!frontTexture || !frontOriginal) return;
-      const w = frontOriginal.width;
-      const h = frontOriginal.height;
+      const w = frontOriginal.width * 2;
+      const h = frontOriginal.height * 2;
       if (!w || !h) return;
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(frontOriginal, 0, 0, w, h);
       if (cardData) {
         ctx.textAlign = 'left';
@@ -1376,30 +1342,28 @@
     window.addEventListener('message', (event) => {
       if (event.data !== 'flip-card') return;
       flipped = !flipped;
+      const angle = flipped ? Math.PI : 0;
+      if (reducedMotion.matches) {
+        flip = null;
+        rig.rotation.y = angle;
+        return;
+      }
       flip = {
         from: rig.rotation.y,
-        to: flipped ? Math.PI : 0,
+        to: angle,
         start: performance.now(),
-        duration: 340
+        duration: 140
       };
     });
 
     const closeBtn = container.querySelector('.card-fs-close');
     const fullscreenTab = document.querySelector('.tab[data-tab="fullscreen"]');
-    let closeTimer = 0;
 
     function openFullscreen() {
       if (isFullscreen) return;
-      clearTimeout(closeTimer);
       isFullscreen = true;
-      container.classList.remove('is-closing');
+      presentation.rotation.z = Math.PI / 2;
       container.classList.add('is-fullscreen');
-      spin = {
-        from: presentation.rotation.z % (Math.PI * 2),
-        to: Math.PI / 2,
-        start: performance.now(),
-        duration: 440
-      };
       resize();
       if (closeBtn) closeBtn.focus({ preventScroll: true });
     }
@@ -1407,19 +1371,10 @@
     function closeFullscreen() {
       if (!isFullscreen) return;
       isFullscreen = false;
-      container.classList.add('is-closing');
-      spin = {
-        from: presentation.rotation.z,
-        to: 0,
-        start: performance.now(),
-        duration: 300
-      };
-      clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => {
-        container.classList.remove('is-fullscreen', 'is-closing');
-        resize();
-        if (fullscreenTab) fullscreenTab.focus({ preventScroll: true });
-      }, 320);
+      presentation.rotation.z = 0;
+      container.classList.remove('is-fullscreen');
+      resize();
+      if (fullscreenTab) fullscreenTab.focus({ preventScroll: true });
     }
 
     document.addEventListener('card-fullscreen-open', openFullscreen);
@@ -1436,14 +1391,6 @@
         if (t >= 1) {
           rig.rotation.y = flip.to;
           flip = null;
-        }
-      }
-      if (spin) {
-        const t = Math.min(1, (now - spin.start) / spin.duration);
-        presentation.rotation.z = spin.from + (spin.to - spin.from) * easeInOutCubic(t);
-        if (t >= 1) {
-          presentation.rotation.z = spin.to;
-          spin = null;
         }
       }
       renderer.render(scene, camera);
