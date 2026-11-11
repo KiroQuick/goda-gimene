@@ -1,4 +1,4 @@
-const CACHE = 'goda-gimene-v8';
+const CACHE = 'goda-gimene-v9';
 
 const ASSETS = [
   './',
@@ -24,7 +24,7 @@ const ASSETS = [
   './assets/ornament-red.svg',
   './assets/ornament-soft.svg',
   './qr code crossed over.png',
-  './streetcap_card.glb',
+  './streetcap_card.glb?v=35442c51',
   './vendor/three/build/three.module.js',
   './vendor/three/examples/jsm/loaders/GLTFLoader.js',
   './vendor/three/examples/jsm/utils/BufferGeometryUtils.js'
